@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Home - Jogos Educativos</title>
+  <style>
+    body { font-family: Arial; background: #eaf6ff; text-align: center; padding: 20px;}
+    h1 { color: #1e88e5; }
+    a, button { display: block; margin: 15px auto; padding: 10px 20px; background: #1e88e5; color: white; text-decoration: none; width: 250px; border-radius: 8px; font-size: 18px; cursor:pointer;}
+    #logout { background:#f44336; }
+    #pontos { font-weight: bold; margin-top: 20px;}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Bem-vindo(a) ao Portal Educativo</h1>
+  <div id="pontos">Carregando pontos...</div>
+  <a href="memoria.html">🧠 Jogo da Memória</a>
+  <a href="quiz.html">📝 Quiz</a>
+  <a href="loja.html">🏪 Loja de Figurinhas</a>
+  <a href="album.html">📖 Álbum de Figurinhas</a>
+  <button id="logout">Sair</button>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
+      authDomain: "education-afd67.firebaseapp.com",
+      projectId: "education-afd67",
+      storageBucket: "education-afd67.firebasestorage.app",
+      messagingSenderId: "985208233773",
+      appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
+      measurementId: "G-7GXT149XN6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) window.location.href = 'index.html';
+      else db.collection('usuarios').doc(user.uid).onSnapshot(doc => {
+        if (doc.exists) document.getElementById('pontos').textContent = `Pontos acumulados: ${doc.data().pontos}`;
+      });
+    });
+
+    document.getElementById('logout').onclick = () => auth.signOut();
+  </script>
+</body>
+</html>
