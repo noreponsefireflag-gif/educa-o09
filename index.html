@@ -2,24 +2,110 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Login Firebase</title>
+  <title>Login / Cadastro - Portal Educativo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0; padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 30px;
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0 20px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      box-shadow: 0 0 8px #2575fc;
+    }
+    button {
+      width: 100%;
+      padding: 12px 0;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #btnLogin {
+      background-color: #2575fc;
+      color: white;
+      margin-bottom: 10px;
+    }
+    #btnLogin:hover {
+      background-color: #1a52c8;
+    }
+    #btnCadastrar {
+      background-color: #7f8c8d;
+      color: white;
+    }
+    #btnCadastrar:hover {
+      background-color: #5e6a6a;
+    }
+    #message {
+      margin-top: 20px;
+      min-height: 20px;
+      font-weight: 600;
+    }
+    @media (max-width: 420px) {
+      .container {
+        padding: 30px 20px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      button {
+        font-size: 1rem;
+      }
+    }
+  </style>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <style>
-    body { font-family: Arial; padding: 20px; max-width: 400px; margin: auto; background: #eaf6ff;}
-    input, button { display: block; margin: 10px 0; padding: 10px; width: 100%; }
-    #message { margin-top: 10px; color: red; }
-  </style>
 </head>
 <body>
-
-  <h1>Login</h1>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="senha" placeholder="Senha" />
-  <button id="btnLogin">Entrar</button>
-  <button id="btnCadastrar">Cadastrar</button>
-  <div id="message"></div>
+  <div class="container">
+    <h1>Portal Educativo</h1>
+    <input type="email" id="email" placeholder="Seu email" autocomplete="username" />
+    <input type="password" id="senha" placeholder="Senha" autocomplete="current-password" />
+    <button id="btnLogin">Entrar</button>
+    <button id="btnCadastrar">Cadastrar</button>
+    <div id="message"></div>
+  </div>
 
   <script>
     const firebaseConfig = {
@@ -36,24 +122,70 @@
     const db = firebase.firestore();
 
     const messageEl = document.getElementById('message');
-    document.getElementById('btnCadastrar').onclick = () => {
-      auth.createUserWithEmailAndPassword(email.value, senha.value)
+    const emailEl = document.getElementById('email');
+    const senhaEl = document.getElementById('senha');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnCadastrar = document.getElementById('btnCadastrar');
+
+    btnCadastrar.onclick = () => {
+      messageEl.style.color = 'white';
+      messageEl.textContent = '';
+      const email = emailEl.value.trim();
+      const senha = senhaEl.value.trim();
+
+      if (!email || !senha) {
+        messageEl.style.color = 'orange';
+        messageEl.textContent = 'Preencha email e senha para cadastrar.';
+        return;
+      }
+
+      auth.createUserWithEmailAndPassword(email, senha)
         .then(userCredential => {
           const user = userCredential.user;
-          db.collection('usuarios').doc(user.uid).set({ email: user.email, pontos: 0, figurinhas: [] });
-          messageEl.style.color = 'green';
-          messageEl.textContent = 'Usuário cadastrado! Faça login.';
+          // Criar documento do usuário no Firestore
+          db.collection('usuarios').doc(user.uid).set({
+            email: user.email,
+            pontos: 0,
+            figurinhas: []
+          });
+          messageEl.style.color = 'lightgreen';
+          messageEl.textContent = 'Cadastro realizado! Agora faça login.';
+          emailEl.value = '';
+          senhaEl.value = '';
         })
-        .catch(error => { messageEl.style.color = 'red'; messageEl.textContent = error.message; });
+        .catch(error => {
+          messageEl.style.color = 'orange';
+          messageEl.textContent = error.message;
+        });
     };
 
-    document.getElementById('btnLogin').onclick = () => {
-      auth.signInWithEmailAndPassword(email.value, senha.value)
-        .then(() => window.location.href = 'home.html')
-        .catch(error => { messageEl.style.color = 'red'; messageEl.textContent = error.message; });
+    btnLogin.onclick = () => {
+      messageEl.style.color = 'white';
+      messageEl.textContent = '';
+      const email = emailEl.value.trim();
+      const senha = senhaEl.value.trim();
+
+      if (!email || !senha) {
+        messageEl.style.color = 'orange';
+        messageEl.textContent = 'Preencha email e senha para entrar.';
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(email, senha)
+        .then(() => {
+          window.location.href = 'home.html';
+        })
+        .catch(error => {
+          messageEl.style.color = 'orange';
+          messageEl.textContent = error.message;
+        });
     };
 
-    auth.onAuthStateChanged(user => { if (user) window.location.href = 'home.html'; });
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        window.location.href = 'home.html';
+      }
+    });
   </script>
 </body>
 </html>
