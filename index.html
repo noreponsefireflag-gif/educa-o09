@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Firebase</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 400px; margin: auto; background: #eaf6ff;}
+    input, button { display: block; margin: 10px 0; padding: 10px; width: 100%; }
+    #message { margin-top: 10px; color: red; }
+  </style>
+</head>
+<body>
+
+  <h1>Login</h1>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="senha" placeholder="Senha" />
+  <button id="btnLogin">Entrar</button>
+  <button id="btnCadastrar">Cadastrar</button>
+  <div id="message"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
+      authDomain: "education-afd67.firebaseapp.com",
+      projectId: "education-afd67",
+      storageBucket: "education-afd67.firebasestorage.app",
+      messagingSenderId: "985208233773",
+      appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
+      measurementId: "G-7GXT149XN6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const messageEl = document.getElementById('message');
+    document.getElementById('btnCadastrar').onclick = () => {
+      auth.createUserWithEmailAndPassword(email.value, senha.value)
+        .then(userCredential => {
+          const user = userCredential.user;
+          db.collection('usuarios').doc(user.uid).set({ email: user.email, pontos: 0, figurinhas: [] });
+          messageEl.style.color = 'green';
+          messageEl.textContent = 'Usuário cadastrado! Faça login.';
+        })
+        .catch(error => { messageEl.style.color = 'red'; messageEl.textContent = error.message; });
+    };
+
+    document.getElementById('btnLogin').onclick = () => {
+      auth.signInWithEmailAndPassword(email.value, senha.value)
+        .then(() => window.location.href = 'home.html')
+        .catch(error => { messageEl.style.color = 'red'; messageEl.textContent = error.message; });
+    };
+
+    auth.onAuthStateChanged(user => { if (user) window.location.href = 'home.html'; });
+  </script>
+</body>
+</html>
