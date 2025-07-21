@@ -7,8 +7,14 @@
     body { font-family: Arial; background:#eaf6ff; text-align:center; padding:20px;}
     h1 { color: #1e88e5;}
     #quiz-box { background:#fff; max-width:600px; margin: 20px auto; padding:20px; border-radius:10px; box-shadow:0 0 10px #aaa;}
-    button { margin:10px; padding:10px; font-size:16px; background:#2196f3; color:white; border:none; border-radius:8px; cursor:pointer;}
-    button:hover { background:#1976d2; }
+    button {
+      margin:10px; padding:10px; font-size:16px; background:#2196f3; color:white;
+      border:none; border-radius:8px; cursor:pointer;
+    }
+    button:hover:not(:disabled) { background:#1976d2; }
+    button:disabled {
+      background:#999; cursor: default;
+    }
     a { display:inline-block; margin-top: 20px; color:#1e88e5; text-decoration:none; font-weight:bold;}
     #feedback { font-weight:bold; margin-top:15px; }
   </style>
@@ -22,7 +28,7 @@
     <p id="pergunta"></p>
     <div id="respostas"></div>
     <p id="feedback"></p>
-    <button onclick="novaPergunta()">Próxima Pergunta</button>
+    <button id="btnProxima" onclick="novaPergunta()" disabled>Próxima Pergunta</button>
   </div>
   <a href="home.html">⬅️ Voltar</a>
 
@@ -31,7 +37,7 @@
       apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
       authDomain: "education-afd67.firebaseapp.com",
       projectId: "education-afd67",
-      storageBucket: "education-afd67.firebasestorage.app",
+      storageBucket: "education-afd67.appspot.com",
       messagingSenderId: "985208233773",
       appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
       measurementId: "G-7GXT149XN6"
@@ -42,55 +48,79 @@
 
     auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; });
 
-    const perguntas = [
-      {
-        pergunta: "Qual destas é um pronome pessoal?",
-        opcoes: ["Mesa", "Ela", "Bonito"],
-        correta: "Ela"
-      },
-      {
-        pergunta: "Qual sinal usamos para encerrar uma frase?",
-        opcoes: ["Ponto final", "Vírgula", "Dois pontos"],
-        correta: "Ponto final"
-      },
-      {
-        pergunta: "Qual é o gênero textual de uma receita?",
-        opcoes: ["Notícia", "Carta", "Receita"],
-        correta: "Receita"
-      }
+    // Base de perguntas maior para pegar 6 diferentes
+    const perguntasOriginais = [
+      { pergunta: "Qual destas é um pronome pessoal?", opcoes: ["Mesa", "Ela", "Bonito"], correta: "Ela" },
+      { pergunta: "Qual sinal usamos para encerrar uma frase?", opcoes: ["Ponto final", "Vírgula", "Dois pontos"], correta: "Ponto final" },
+      { pergunta: "Qual é o gênero textual de uma receita?", opcoes: ["Notícia", "Carta", "Receita"], correta: "Receita" },
+      { pergunta: "Qual é o plural de 'pessoa'?", opcoes: ["Pessoas", "Pessoais", "Pessosas"], correta: "Pessoas" },
+      { pergunta: "Qual pronome substitui 'João'?", opcoes: ["Ele", "Nós", "Ela"], correta: "Ele" },
+      { pergunta: "Qual sinal indica uma pergunta?", opcoes: ["!", "?", "."], correta: "?" },
+      { pergunta: "Qual é o gênero textual de uma carta?", opcoes: ["Bilhete", "Carta", "Poema"], correta: "Carta" },
+      { pergunta: "Qual pronome usamos para falar de nós mesmos?", opcoes: ["Eu", "Você", "Nós"], correta: "Nós" }
     ];
 
+    let perguntas = [];
     let perguntaAtual = 0;
+    let pontuacao = 0;
+    let respondeu = false;
 
-    function carregarPergunta() {
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function novaPergunta() {
+      respondeu = false;
+      document.getElementById('feedback').textContent = '';
+      const btnProxima = document.getElementById('btnProxima');
+      btnProxima.disabled = true;
+
+      if (perguntaAtual === 0) {
+        pontuacao = 0;
+        perguntas = shuffle([...perguntasOriginais]).slice(0, 6);
+      }
+
+      if (perguntaAtual >= perguntas.length) {
+        document.getElementById('pergunta').textContent = `Quiz finalizado! Sua pontuação: ${pontuacao} / ${perguntas.length}`;
+        document.getElementById('respostas').innerHTML = '';
+        btnProxima.disabled = true;
+        salvarPontos(pontuacao);
+        return;
+      }
+
       const p = perguntas[perguntaAtual];
       document.getElementById('pergunta').textContent = p.pergunta;
+
       const respostasDiv = document.getElementById('respostas');
       respostasDiv.innerHTML = '';
       p.opcoes.forEach(op => {
         const btn = document.createElement('button');
         btn.textContent = op;
-        btn.onclick = () => verificarResposta(op, p.correta);
+        btn.onclick = () => verificarResposta(btn, op, p.correta);
+        btn.disabled = false;
         respostasDiv.appendChild(btn);
       });
-      document.getElementById('feedback').textContent = '';
+
+      perguntaAtual++;
     }
 
-    function verificarResposta(escolhida, correta) {
+    function verificarResposta(botao, escolhida, correta) {
+      if (respondeu) return;
+      respondeu = true;
+
+      const botoes = document.getElementById('respostas').querySelectorAll('button');
+      botoes.forEach(b => b.disabled = true);
+
       const feedback = document.getElementById('feedback');
       if (escolhida === correta) {
         feedback.style.color = 'green';
         feedback.textContent = 'Correto! +1 ponto';
-        salvarPontos(1);
+        pontuacao++;
       } else {
         feedback.style.color = 'red';
-        feedback.textContent = 'Incorreto!';
+        feedback.textContent = `Incorreto! Resposta correta: "${correta}"`;
       }
-    }
-
-    function novaPergunta() {
-      perguntaAtual = (perguntaAtual + 1) % perguntas.length;
-      carregarPergunta();
+      document.getElementById('btnProxima').disabled = false;
     }
 
     function salvarPontos(pontos) {
@@ -98,12 +128,16 @@
       if (user) {
         const ref = db.collection('usuarios').doc(user.uid);
         ref.get().then(doc => {
-          if (doc.exists) ref.update({ pontos: (doc.data().pontos || 0) + pontos });
+          if (doc.exists) {
+            const totalAtual = doc.data().pontos || 0;
+            ref.update({ pontos: totalAtual + pontos });
+          }
         });
       }
     }
 
-    carregarPergunta();
+    // Inicia o quiz na carga da página
+    window.onload = novaPergunta;
   </script>
 </body>
 </html>
