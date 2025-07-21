@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Loja de Figurinhas</title>
+  <style>
+    body { font-family: Arial; background:#eaf6ff; text-align:center; padding:20px;}
+    h1 { color:#1e88e5;}
+    .figurinha { display:inline-block; margin:10px; padding:20px; background:white; border:1px solid #ccc; border-radius:8px; cursor:pointer;}
+    .figurinha:hover { background:#f1f1f1;}
+    #pontos { font-weight:bold; margin:20px;}
+    a { display:inline-block; margin-top: 20px; color:#1e88e5; text-decoration:none; font-weight:bold;}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Loja de Figurinhas</h1>
+  <div id="pontos">Carregando pontos...</div>
+  <div id="loja"></div>
+  <a href="home.html">⬅️ Voltar</a>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
+      authDomain: "education-afd67.firebaseapp.com",
+      projectId: "education-afd67",
+      storageBucket: "education-afd67.firebasestorage.app",
+      messagingSenderId: "985208233773",
+      appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
+      measurementId: "G-7GXT149XN6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const figurinhas = [
+      { nome: "Figurinha A", preco: 5 },
+      { nome: "Figurinha B", preco: 10 },
+      { nome: "Figurinha C", preco: 15 }
+    ];
+
+    let usuarioRef;
+
+    auth.onAuthStateChanged(user => {
+      if (!user) return window.location.href = 'index.html';
+      usuarioRef = db.collection('usuarios').doc(user.uid);
+      usuarioRef.onSnapshot(doc => {
+        if (doc.exists) document.getElementById('pontos').textContent = `Pontos: ${doc.data().pontos}`;
+      });
+    });
+
+    const lojaDiv = document.getElementById('loja');
+    figurinhas.forEach(fig => {
+      const div = document.createElement('div');
+      div.className = 'figurinha';
+      div.textContent = `${fig.nome} - ${fig.preco} pontos`;
+      div.onclick = () => comprarFigurinha(fig);
+      lojaDiv.appendChild(div);
+    });
+
+    function comprarFigurinha(fig) {
+      usuarioRef.get().then(doc => {
+        if (!doc.exists) return;
+        const data = doc.data();
+        if ((data.pontos || 0) >= fig.preco) {
+          usuarioRef.update({
+            pontos: data.pontos - fig.preco,
+            figurinhas: [...(data.figurinhas || []), fig.nome]
+          });
+          alert(`Você comprou ${fig.nome}!`);
+        } else {
+          alert('Pontos insuficientes!');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
