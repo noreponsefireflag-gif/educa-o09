@@ -1,4 +1,4 @@
-#Portal Educativo - Jogos para 5º Ano
+Portal Educativo - Jogos para 5º Ano
 Projeto de site educativo com jogos interativos para alunos do 5º ano do ensino fundamental. Inclui login com Firebase, pontuação acumulada, loja e álbum de figurinhas.
 
 Funcionalidades
@@ -57,4 +57,3 @@ Envie pull requests com correções ou novas funcionalidades
 Licença
 Projeto open-source, sinta-se livre para usar e adaptar para seus estudos e projetos.
 
-# educa-o09
