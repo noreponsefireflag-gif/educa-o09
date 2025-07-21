@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz Educativo</title>
+  <style>
+    body { font-family: Arial; background:#eaf6ff; text-align:center; padding:20px;}
+    h1 { color: #1e88e5;}
+    #quiz-box { background:#fff; max-width:600px; margin: 20px auto; padding:20px; border-radius:10px; box-shadow:0 0 10px #aaa;}
+    button { margin:10px; padding:10px; font-size:16px; background:#2196f3; color:white; border:none; border-radius:8px; cursor:pointer;}
+    button:hover { background:#1976d2; }
+    a { display:inline-block; margin-top: 20px; color:#1e88e5; text-decoration:none; font-weight:bold;}
+    #feedback { font-weight:bold; margin-top:15px; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Quiz Educativo</h1>
+  <div id="quiz-box">
+    <p id="pergunta"></p>
+    <div id="respostas"></div>
+    <p id="feedback"></p>
+    <button onclick="novaPergunta()">Próxima Pergunta</button>
+  </div>
+  <a href="home.html">⬅️ Voltar</a>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
+      authDomain: "education-afd67.firebaseapp.com",
+      projectId: "education-afd67",
+      storageBucket: "education-afd67.firebasestorage.app",
+      messagingSenderId: "985208233773",
+      appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
+      measurementId: "G-7GXT149XN6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; });
+
+    const perguntas = [
+      {
+        pergunta: "Qual destas é um pronome pessoal?",
+        opcoes: ["Mesa", "Ela", "Bonito"],
+        correta: "Ela"
+      },
+      {
+        pergunta: "Qual sinal usamos para encerrar uma frase?",
+        opcoes: ["Ponto final", "Vírgula", "Dois pontos"],
+        correta: "Ponto final"
+      },
+      {
+        pergunta: "Qual é o gênero textual de uma receita?",
+        opcoes: ["Notícia", "Carta", "Receita"],
+        correta: "Receita"
+      }
+    ];
+
+    let perguntaAtual = 0;
+
+    function carregarPergunta() {
+      const p = perguntas[perguntaAtual];
+      document.getElementById('pergunta').textContent = p.pergunta;
+      const respostasDiv = document.getElementById('respostas');
+      respostasDiv.innerHTML = '';
+      p.opcoes.forEach(op => {
+        const btn = document.createElement('button');
+        btn.textContent = op;
+        btn.onclick = () => verificarResposta(op, p.correta);
+        respostasDiv.appendChild(btn);
+      });
+      document.getElementById('feedback').textContent = '';
+    }
+
+    function verificarResposta(escolhida, correta) {
+      const feedback = document.getElementById('feedback');
+      if (escolhida === correta) {
+        feedback.style.color = 'green';
+        feedback.textContent = 'Correto! +1 ponto';
+        salvarPontos(1);
+      } else {
+        feedback.style.color = 'red';
+        feedback.textContent = 'Incorreto!';
+      }
+    }
+
+    function novaPergunta() {
+      perguntaAtual = (perguntaAtual + 1) % perguntas.length;
+      carregarPergunta();
+    }
+
+    function salvarPontos(pontos) {
+      const user = auth.currentUser;
+      if (user) {
+        const ref = db.collection('usuarios').doc(user.uid);
+        ref.get().then(doc => {
+          if (doc.exists) ref.update({ pontos: (doc.data().pontos || 0) + pontos });
+        });
+      }
+    }
+
+    carregarPergunta();
+  </script>
+</body>
+</html>
