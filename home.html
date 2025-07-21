@@ -17,6 +17,7 @@
 <body>
   <h1>Bem-vindo(a) ao Portal Educativo</h1>
   <div id="pontos">Carregando pontos...</div>
+
   <a href="memoria.html">🧠 Jogo da Memória</a>
   <a href="quiz.html">📝 Quiz</a>
   <a href="loja.html">🏪 Loja de Figurinhas</a>
@@ -38,10 +39,22 @@
     const db = firebase.firestore();
 
     auth.onAuthStateChanged(user => {
-      if (!user) window.location.href = 'index.html';
-      else db.collection('usuarios').doc(user.uid).onSnapshot(doc => {
-        if (doc.exists) document.getElementById('pontos').textContent = `Pontos acumulados: ${doc.data().pontos}`;
-      });
+      if (!user) {
+        window.location.href = 'index.html';
+      } else {
+        const pontosEl = document.getElementById('pontos');
+        db.collection('usuarios').doc(user.uid).onSnapshot(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            pontosEl.textContent = `Pontos acumulados: ${data.pontos ?? 0}`;
+          } else {
+            pontosEl.textContent = "Nenhum dado encontrado.";
+          }
+        }, error => {
+          pontosEl.textContent = "Erro ao carregar pontos.";
+          console.error(error);
+        });
+      }
     });
 
     document.getElementById('logout').onclick = () => auth.signOut();
