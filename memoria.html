@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jogo da Memória</title>
+  <style>
+    body { font-family: Arial; background:#eaf6ff; text-align:center; padding:20px;}
+    h1 { color: #1e88e5;}
+    button { margin:10px; padding: 12px 20px; font-size: 16px; background: #2196f3; color: white; border: none; border-radius: 8px; cursor:pointer;}
+    button:hover { background: #1976d2;}
+    .game-board { display: grid; grid-template-columns: repeat(4, 120px); grid-gap: 15px; justify-content:center; margin-top: 20px;}
+    .card { width: 120px; height: 120px; background:#2196f3; color: white; font-weight: bold; font-size: 16px; display:flex; justify-content:center; align-items:center; border-radius:8px; cursor:pointer; user-select:none; transition: background 0.3s;}
+    .card.flipped { background: #4caf50;}
+    #score { font-weight:bold; margin-top: 20px;}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Jogo da Memória: Escolha o modo</h1>
+
+  <div id="menu">
+    <button onclick="startGame('generos')">📄 Gêneros Textuais</button>
+    <button onclick="startGame('pontuacao')">✍️ Pontuação</button>
+    <button onclick="startGame('pronomes')">🗣️ Pronomes Pessoais</button>
+  </div>
+
+  <div id="jogo" style="display:none;">
+    <p id="score">Pontuação: 0</p>
+    <section class="game-board" id="game-board"></section>
+    <button onclick="voltarMenu()">Voltar ao Menu</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
+      authDomain: "education-afd67.firebaseapp.com",
+      projectId: "education-afd67",
+      storageBucket: "education-afd67.firebasestorage.app",
+      messagingSenderId: "985208233773",
+      appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
+      measurementId: "G-7GXT149XN6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; });
+
+    const board = document.getElementById('game-board');
+    const scoreDisplay = document.getElementById('score');
+    const menu = document.getElementById('menu');
+    const jogo = document.getElementById('jogo');
+
+    let flippedCards = [];
+    let score = 0;
+
+    const modos = {
+      generos: [
+        { id: 1, text: 'Receita' }, { id: 1, text: 'Gênero Textual' },
+        { id: 2, text: 'Carta' }, { id: 2, text: 'Gênero Textual' },
+        { id: 3, text: 'Notícia' }, { id: 3, text: 'Gênero Textual' },
+        { id: 4, text: 'Poema' }, { id: 4, text: 'Gênero Textual' },
+        { id: 5, text: 'Bilhete' }, { id: 5, text: 'Gênero Textual' },
+        { id: 6, text: 'Entrevista' }, { id: 6, text: 'Gênero Textual' }
+      ],
+      pontuacao: [
+        { id: 1, text: '!' }, { id: 1, text: 'Ponto de Exclamação' },
+        { id: 2, text: '?' }, { id: 2, text: 'Ponto de Interrogação' },
+        { id: 3, text: '.' }, { id: 3, text: 'Ponto Final' },
+        { id: 4, text: ',' }, { id: 4, text: 'Vírgula' },
+        { id: 5, text: ':' }, { id: 5, text: 'Dois Pontos' },
+        { id: 6, text: ';' }, { id: 6, text: 'Ponto e Vírgula' }
+      ],
+      pronomes: [
+        { id: 1, text: 'Eu' }, { id: 1, text: 'Pronome Pessoal' },
+        { id: 2, text: 'Tu' }, { id: 2, text: 'Pronome Pessoal' },
+        { id: 3, text: 'Ele' }, { id: 3, text: 'Pronome Pessoal' },
+        { id: 4, text: 'Nós' }, { id: 4, text: 'Pronome Pessoal' },
+        { id: 5, text: 'Vós' }, { id: 5, text: 'Pronome Pessoal' },
+        { id: 6, text: 'Eles' }, { id: 6, text: 'Pronome Pessoal' }
+      ]
+    };
+
+    function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
+
+    function startGame(modo) {
+      score = 0;
+      scoreDisplay.textContent = 'Pontuação: 0';
+      board.innerHTML = '';
+      menu.style.display = 'none';
+      jogo.style.display = 'block';
+
+      const cards = shuffle(modos[modo]);
+      cards.forEach(cardData => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.id = modo + '_' + cardData.id;
+        card.textContent = '';
+        card.onclick = () => flipCard(card, cardData.text);
+        board.appendChild(card);
+      });
+    }
+
+    function flipCard(card, text) {
+      if (card.classList.contains('flipped') || flippedCards.length === 2) return;
+      card.textContent = text;
+      card.classList.add('flipped');
+      flippedCards.push({ card, id: card.dataset.id });
+      if (flippedCards.length === 2) {
+        const [first, second] = flippedCards;
+        if (first.id === second.id && first.card !== second.card) {
+          score++;
+          scoreDisplay.textContent = `Pontuação: ${score}`;
+          flippedCards = [];
+          salvarPontos(score);
+        } else {
+          setTimeout(() => {
+            first.card.textContent = '';
+            second.card.textContent = '';
+            first.card.classList.remove('flipped');
+            second.card.classList.remove('flipped');
+            flippedCards = [];
+          }, 1000);
+        }
+      }
+    }
+
+    function voltarMenu() {
+      jogo.style.display = 'none';
+      menu.style.display = 'block';
+      board.innerHTML = '';
+      flippedCards = [];
+    }
+
+    function salvarPontos(novosPontos) {
+      const user = auth.currentUser;
+      if (user) {
+        const userRef = db.collection('usuarios').doc(user.uid);
+        userRef.get().then(doc => {
+          if (doc.exists) userRef.update({ pontos: (doc.data().pontos || 0) + novosPontos });
+        });
+      }
+    }
+  </script>
+</body>
+</html>
