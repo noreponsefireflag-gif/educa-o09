@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Álbum de Figurinhas</title>
+  <style>
+    body { font-family: Arial; background:#eaf6ff; text-align:center; padding:20px;}
+    h1 { color:#1e88e5;}
+    .figurinha { display:inline-block; margin:10px; padding:20px; background:white; border:1px solid #ccc; border-radius:8px;}
+    a { display:inline-block; margin-top: 20px; color:#1e88e5; text-decoration:none; font-weight:bold;}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Meu Álbum de Figurinhas</h1>
+  <div id="album">Carregando...</div>
+  <a href="home.html">⬅️ Voltar</a>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
+      authDomain: "education-afd67.firebaseapp.com",
+      projectId: "education-afd67",
+      storageBucket: "education-afd67.firebasestorage.app",
+      messagingSenderId: "985208233773",
+      appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
+      measurementId: "G-7GXT149XN6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) return window.location.href = 'index.html';
+      db.collection('usuarios').doc(user.uid).onSnapshot(doc => {
+        if (!doc.exists) return;
+        const figurinhas = doc.data().figurinhas || [];
+        const albumDiv = document.getElementById('album');
+        albumDiv.innerHTML = '';
+        if (figurinhas.length === 0) {
+          albumDiv.textContent = 'Nenhuma figurinha ainda.';
+        } else {
+          figurinhas.forEach(nome => {
+            const div = document.createElement('div');
+            div.className = 'figurinha';
+            div.textContent = nome;
+            albumDiv.appendChild(div);
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
