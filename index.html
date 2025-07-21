@@ -4,93 +4,46 @@
   <meta charset="UTF-8" />
   <title>Login / Cadastro - Portal Educativo</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0; padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: #fff;
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh; color: #fff;
     }
     .container {
       background: rgba(255, 255, 255, 0.1);
       padding: 40px 30px;
       border-radius: 12px;
-      width: 100%;
-      max-width: 380px;
+      width: 100%; max-width: 380px;
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.18);
       text-align: center;
     }
-    h1 {
-      margin-bottom: 30px;
-      font-weight: 700;
-      font-size: 1.8rem;
-      letter-spacing: 1px;
-    }
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0 20px 0;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      outline: none;
+    h1 { margin-bottom: 30px; font-weight: 700; font-size: 1.8rem; letter-spacing: 1px; }
+    input[type="email"], input[type="password"] {
+      width: 100%; padding: 12px 15px; margin: 10px 0 20px 0;
+      border: none; border-radius: 8px; font-size: 1rem; outline: none;
       transition: box-shadow 0.3s ease;
     }
-    input[type="email"]:focus,
-    input[type="password"]:focus {
-      box-shadow: 0 0 8px #2575fc;
-    }
+    input[type="email"]:focus, input[type="password"]:focus { box-shadow: 0 0 8px #2575fc; }
     button {
-      width: 100%;
-      padding: 12px 0;
-      margin-top: 10px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+      width: 100%; padding: 12px 0; margin-top: 10px;
+      border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600;
+      cursor: pointer; transition: background-color 0.3s ease;
     }
-    #btnLogin {
-      background-color: #2575fc;
-      color: white;
-      margin-bottom: 10px;
-    }
-    #btnLogin:hover {
-      background-color: #1a52c8;
-    }
-    #btnCadastrar {
-      background-color: #7f8c8d;
-      color: white;
-    }
-    #btnCadastrar:hover {
-      background-color: #5e6a6a;
-    }
-    #message {
-      margin-top: 20px;
-      min-height: 20px;
-      font-weight: 600;
-    }
+    #btnLogin { background-color: #2575fc; color: white; margin-bottom: 10px; }
+    #btnLogin:hover { background-color: #1a52c8; }
+    #btnCadastrar { background-color: #7f8c8d; color: white; }
+    #btnCadastrar:hover { background-color: #5e6a6a; }
+    #message { margin-top: 20px; min-height: 20px; font-weight: 600; }
     @media (max-width: 420px) {
-      .container {
-        padding: 30px 20px;
-      }
-      h1 {
-        font-size: 1.5rem;
-      }
-      button {
-        font-size: 1rem;
-      }
+      .container { padding: 30px 20px; }
+      h1 { font-size: 1.5rem; }
+      button { font-size: 1rem; }
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -142,7 +95,6 @@
       auth.createUserWithEmailAndPassword(email, senha)
         .then(userCredential => {
           const user = userCredential.user;
-          // Criar documento do usuário no Firestore
           db.collection('usuarios').doc(user.uid).set({
             email: user.email,
             pontos: 0,
@@ -172,8 +124,13 @@
       }
 
       auth.signInWithEmailAndPassword(email, senha)
-        .then(() => {
-          window.location.href = 'home.html';
+        .then(userCredential => {
+          const user = userCredential.user;
+          if (user.email === 'heitoradmgame@gmail.com' && senha === 'heitor03092014') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'home.html';
+          }
         })
         .catch(error => {
           messageEl.style.color = 'orange';
@@ -183,7 +140,11 @@
 
     auth.onAuthStateChanged(user => {
       if (user) {
-        window.location.href = 'home.html';
+        if (user.email === 'heitoradmgame@gmail.com') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'home.html';
+        }
       }
     });
   </script>
