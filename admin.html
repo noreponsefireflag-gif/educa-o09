@@ -2,41 +2,23 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Área do ADM</title>
+  <title>Painel do Administrador</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #222;
-      color: #4caf50;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      text-align: center;
-    }
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 20px;
-    }
-    button {
-      padding: 10px 25px;
-      font-size: 1.2rem;
-      border: none;
-      border-radius: 8px;
-      background-color: #4caf50;
-      color: white;
-      cursor: pointer;
-    }
+    body { font-family: Arial; background: #f0f2f5; padding: 20px; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #2575fc; color: white; }
   </style>
-</head>
-<body>
-  <h1>Bem-vindo, ADM!</h1>
-  <p>Você tem acesso especial ao sistema.</p>
-  <button onclick="logout()">Sair</button>
-
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Painel do Administrador</h1>
+  <table id="usuarios">
+    <tr><th>Email</th><th>Pontos</th></tr>
+  </table>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
@@ -49,19 +31,24 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
     auth.onAuthStateChanged(user => {
-      if (!user) {
+      if (!user || (user.email !== 'heitoradmgame@gmail.com')) {
+        alert('Acesso negado!');
         window.location.href = 'index.html';
-      } else if (user.email !== 'heitoradmgame@gmail.com') {
-        // Se não for ADM, manda para home normal
-        window.location.href = 'home.html';
+      } else {
+        db.collection('usuarios').get().then(snapshot => {
+          const tabela = document.getElementById('usuarios');
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const linha = document.createElement('tr');
+            linha.innerHTML = `<td>${data.email}</td><td>${data.pontos}</td>`;
+            tabela.appendChild(linha);
+          });
+        });
       }
     });
-
-    function logout() {
-      auth.signOut();
-    }
   </script>
 </body>
 </html>
