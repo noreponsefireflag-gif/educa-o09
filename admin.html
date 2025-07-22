@@ -1,14 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Painel do Administrador</title>
   <style>
-    body { font-family: Arial; background: #f0f2f5; padding: 20px; }
-    h1 { color: #333; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #2575fc; color: white; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f0f4ff, #cfe0fc);
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #1e3a8a; }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 80%;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background: #2563eb;
+      color: white;
+    }
+    tr:hover { background: #f1f5f9; }
+    #logout {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #logout:hover { background: #dc2626; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -16,9 +47,20 @@
 </head>
 <body>
   <h1>Painel do Administrador</h1>
-  <table id="usuarios">
-    <tr><th>Email</th><th>Pontos</th></tr>
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Pontos</th>
+        <th>Figurinhas</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-usuarios">
+      <tr><td colspan="3">Carregando dados...</td></tr>
+    </tbody>
   </table>
+  <button id="logout">Sair</button>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
@@ -33,22 +75,45 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    const tabela = document.getElementById('tabela-usuarios');
+
     auth.onAuthStateChanged(user => {
-      if (!user || (user.email !== 'heitoradmgame@gmail.com')) {
-        alert('Acesso negado!');
+      if (!user) {
         window.location.href = 'index.html';
       } else {
-        db.collection('usuarios').get().then(snapshot => {
-          const tabela = document.getElementById('usuarios');
+        // Verificar se é admin (por email)
+        if (user.email.toLowerCase() !== 'heitoradmgame@gmail.com') {
+          alert('Acesso negado: você não é administrador.');
+          auth.signOut();
+          return;
+        }
+
+        // Carregar usuários
+        db.collection('usuarios').onSnapshot(snapshot => {
+          tabela.innerHTML = '';
+          if (snapshot.empty) {
+            tabela.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum usuário encontrado.</td></tr>';
+            return;
+          }
           snapshot.forEach(doc => {
             const data = doc.data();
-            const linha = document.createElement('tr');
-            linha.innerHTML = `<td>${data.email}</td><td>${data.pontos}</td>`;
-            tabela.appendChild(linha);
+            const email = data.email || 'Sem email';
+            const pontos = data.pontos ?? 0;
+            const figurinhas = Array.isArray(data.figurinhas) ? data.figurinhas.join(', ') : 'Nenhuma';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${email}</td>
+              <td>${pontos}</td>
+              <td>${figurinhas}</td>
+            `;
+            tabela.appendChild(tr);
           });
         });
       }
     });
+
+    document.getElementById('logout').onclick = () => auth.signOut();
   </script>
 </body>
 </html>
