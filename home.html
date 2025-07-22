@@ -82,11 +82,14 @@
         const userRef = db.collection('usuarios').doc(user.uid);
         userRef.onSnapshot(doc => {
           if (doc.exists) {
-            pontosEl.textContent = `Pontos acumulados: ${doc.data().pontos}`;
+            const data = doc.data();
+            const pontos = data.pontos !== undefined ? data.pontos : 0;
+            pontosEl.textContent = `Pontos acumulados: ${pontos}`;
           } else {
-            pontosEl.textContent = "Nenhum ponto encontrado.";
+            pontosEl.textContent = "Pontos acumulados: 0";
           }
-        }, () => {
+        }, error => {
+          console.error("Erro ao carregar pontos:", error);
           pontosEl.textContent = "Erro ao carregar pontos.";
         });
       }
