@@ -2,108 +2,97 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login Firebase - Jogos Educativos</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <style>
     body {
-      background: linear-gradient(135deg, #cce4f7, #4a90e2);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f0f4ff, #cfe0fc);
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
     }
     #login-box {
       background: white;
-      padding: 40px 50px;
+      width: 90%;
+      max-width: 360px;
+      padding: 2.5rem 2rem;
       border-radius: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      width: 320px;
+      box-sizing: border-box;
       text-align: center;
     }
-    h1 {
-      margin-bottom: 25px;
-      color: #1a3c72;
+    #login-box h1 {
+      margin-bottom: 1.5rem;
+      color: #1e3a8a;
     }
-    input[type="email"], input[type="password"] {
+    input[type="email"],
+    input[type="password"] {
       width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0 20px 0;
-      border: 1px solid #ccc;
+      padding: 0.9rem 1rem;
+      margin-bottom: 1rem;
+      border: 1.8px solid #c5d2f6;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 1rem;
       box-sizing: border-box;
       transition: border-color 0.3s;
     }
-    input[type="email"]:focus, input[type="password"]:focus {
-      border-color: #4a90e2;
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: #2563eb;
       outline: none;
     }
     button {
       width: 100%;
-      background-color: #1a3c72;
-      color: white;
-      padding: 14px 0;
+      padding: 0.9rem 1rem;
+      margin: 0.6rem 0;
       border: none;
       border-radius: 8px;
-      font-size: 18px;
+      background-color: #2563eb;
+      color: white;
+      font-size: 1.1rem;
       cursor: pointer;
-      margin-bottom: 15px;
       transition: background-color 0.3s;
     }
     button:hover {
-      background-color: #1350a3;
-    }
-    #btnCadastrar {
-      background-color: #50a1ff;
-    }
-    #btnCadastrar:hover {
-      background-color: #1a75ff;
+      background-color: #1d4ed8;
     }
     #btnGoogle {
       background-color: #de5246;
-      margin-top: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      font-weight: bold;
-      font-size: 16px;
+      margin-top: 1.2rem;
     }
     #btnGoogle:hover {
-      background-color: #c33b30;
-    }
-    #btnGoogle img {
-      width: 20px;
-      height: 20px;
+      background-color: #c13b2e;
     }
     #message {
-      height: 22px;
-      font-weight: 600;
-      margin-top: 10px;
+      margin-top: 1rem;
+      height: 1.4rem;
       color: red;
+      font-weight: bold;
+      font-size: 0.9rem;
     }
   </style>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div id="login-box">
     <h1>Login</h1>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="senha" placeholder="Senha" />
+    <input type="email" id="email" placeholder="Email" autocomplete="username" />
+    <input type="password" id="senha" placeholder="Senha" autocomplete="current-password" />
     <button id="btnLogin">Entrar</button>
     <button id="btnCadastrar">Cadastrar</button>
-    <button id="btnGoogle">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google logo" />
-      Entrar com Google
-    </button>
+    <button id="btnGoogle">Entrar com Google</button>
     <div id="message"></div>
   </div>
 
   <script>
+    // Config Firebase - troque pelos seus dados
     const firebaseConfig = {
       apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
       authDomain: "education-afd67.firebaseapp.com",
@@ -113,6 +102,8 @@
       appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
       measurementId: "G-7GXT149XN6"
     };
+
+    // Inicializa Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -127,15 +118,11 @@
     btnCadastrar.onclick = () => {
       messageEl.style.color = 'red';
       messageEl.textContent = '';
-      const email = emailEl.value.trim();
-      const senha = senhaEl.value.trim();
-
-      if (!email || !senha) {
-        messageEl.textContent = 'Por favor, preencha email e senha.';
+      if (!emailEl.value || !senhaEl.value) {
+        messageEl.textContent = 'Preencha email e senha para cadastrar.';
         return;
       }
-
-      auth.createUserWithEmailAndPassword(email, senha)
+      auth.createUserWithEmailAndPassword(emailEl.value, senhaEl.value)
         .then(userCredential => {
           const user = userCredential.user;
           db.collection('usuarios').doc(user.uid).set({
@@ -153,27 +140,24 @@
     };
 
     btnLogin.onclick = () => {
-      messageEl.style.color = '#333';
+      messageEl.style.color = 'red';
       messageEl.textContent = '';
-      const email = emailEl.value.trim();
-      const senha = senhaEl.value.trim();
-
-      if (!email || !senha) {
-        messageEl.style.color = 'red';
-        messageEl.textContent = 'Por favor, preencha email e senha.';
+      if (!emailEl.value || !senhaEl.value) {
+        messageEl.textContent = 'Preencha email e senha para entrar.';
         return;
       }
 
-      auth.signInWithEmailAndPassword(email, senha)
+      // Se for admin pelo email e senha especiais
+      if (emailEl.value === 'heitoradmgame@gmail.com' && senhaEl.value === 'heitor03092014') {
+        window.location.href = 'admin.html';
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(emailEl.value, senhaEl.value)
         .then(userCredential => {
-          if (email === 'heitoradmgame@gmail.com' && senha === 'heitor03092014') {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'home.html';
-          }
+          window.location.href = 'home.html';
         })
         .catch(error => {
-          messageEl.style.color = 'red';
           messageEl.textContent = error.message;
         });
     };
@@ -182,20 +166,9 @@
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
         .then(result => {
-          // Adiciona usuário ao Firestore caso não exista
           const user = result.user;
-          const userRef = db.collection('usuarios').doc(user.uid);
-          userRef.get().then(doc => {
-            if (!doc.exists) {
-              userRef.set({
-                email: user.email,
-                pontos: 0,
-                figurinhas: []
-              });
-            }
-          });
-          // Redireciona admin ou home
-          if (user.email === 'heitoradmgame@gmail.com') {
+          // Se o email do Google for admin, redireciona pro admin
+          if(user.email === 'heitoradmgame@gmail.com'){
             window.location.href = 'admin.html';
           } else {
             window.location.href = 'home.html';
@@ -207,10 +180,9 @@
         });
     };
 
-    // Se já estiver logado, redireciona automaticamente
     auth.onAuthStateChanged(user => {
-      if (user) {
-        if (user.email === 'heitoradmgame@gmail.com') {
+      if(user){
+        if(user.email === 'heitoradmgame@gmail.com'){
           window.location.href = 'admin.html';
         } else {
           window.location.href = 'home.html';
