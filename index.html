@@ -1,75 +1,162 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Login - Jogos Educativos</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #f0f4ff, #cfe0fc);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .login-box {
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      text-align: center;
-      width: 320px;
-    }
-    h1 {
-      margin-bottom: 20px;
-      color: #1e3a8a;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-bottom: 10px;
-      transition: background 0.3s;
-    }
-    button:hover { background: #1d4ed8; }
-    #btnGoogle {
-      background: #ea4335;
-    }
-    #btnGoogle:hover {
-      background: #c62828;
-    }
-    #message {
-      margin-top: 10px;
-      color: red;
-      font-size: 14px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - Portal Educativo</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #4a90e2, #357abd);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: #fff;
+      max-width: 400px;
+      width: 100%;
+      border-radius: 15px;
+      padding: 30px 35px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      color: #1e3a8a;
+      font-weight: 700;
+      font-size: 2.8rem;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 15px;
+      margin: 12px 0 20px;
+      border: 1.8px solid #ddd;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 8px #4a90e2aa;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px 0;
+      margin: 12px 0;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      user-select: none;
+      box-shadow: 0 6px 10px rgba(0,0,0,0.1);
+    }
+
+    #btnLogin {
+      background: #1e88e5;
+    }
+    #btnLogin:hover {
+      background: #1669bb;
+    }
+
+    #btnCadastrar {
+      background: #43a047;
+    }
+    #btnCadastrar:hover {
+      background: #338039;
+    }
+
+    #btnGoogle {
+      background: #db4437;
+    }
+    #btnGoogle:hover {
+      background: #b33628;
+    }
+
+    #btnGoogle svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+
+    #message {
+      min-height: 28px;
+      margin-top: 15px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #d32f2f;
+      user-select: none;
+    }
+
+    @media (max-width: 440px) {
+      .container {
+        padding: 25px 20px;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      button {
+        font-size: 1rem;
+        padding: 12px 0;
+      }
+      input[type="email"],
+      input[type="password"] {
+        font-size: 1rem;
+        padding: 12px 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="login-box">
-    <h1>Login</h1>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="senha" placeholder="Senha">
+  <div class="container">
+    <h1>Portal Educativo</h1>
+
+    <input type="email" id="email" placeholder="Email" autocomplete="username" />
+    <input type="password" id="senha" placeholder="Senha" autocomplete="current-password" />
+
     <button id="btnLogin">Entrar</button>
     <button id="btnCadastrar">Cadastrar</button>
-    <button id="btnGoogle">Entrar com Google</button>
+
+    <button id="btnGoogle" aria-label="Entrar com Google">
+      <svg viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M533.5 278.4c0-17.7-1.6-34.8-4.6-51.4H272v97.3h146.9c-6.3 34-25.1 62.8-53.7 82.1v68h86.7c50.7-46.7 80-115.2 80-195.9z" fill="#4285f4"/>
+        <path d="M272 544.3c72.6 0 133.6-24.1 178.2-65.3l-86.7-68c-24.1 16.2-55 25.7-91.5 25.7-70.4 0-130-47.6-151.4-111.3h-89.8v69.9C77.5 480.4 168.8 544.3 272 544.3z" fill="#34a853"/>
+        <path d="M120.6 324.1c-7.7-22.9-7.7-47.6 0-70.5v-69.9h-89.8C13.1 230.5 0 252.9 0 278.4c0 25.5 13.1 47.9 30.8 69.8l89.8-69.9z" fill="#fbbc04"/>
+        <path d="M272 107.9c38.9 0 73.8 13.4 101.3 39.8l76-76C403.6 24.6 344.9 0 272 0 168.8 0 77.5 63.9 47.8 156.6l89.8 69.9c21.4-63.7 81-111.3 151.4-111.3z" fill="#ea4335"/>
+      </svg>
+      Entrar com Google
+    </button>
+
     <div id="message"></div>
   </div>
 
@@ -87,28 +174,26 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    const messageEl = document.getElementById('message');
     const emailEl = document.getElementById('email');
     const senhaEl = document.getElementById('senha');
-    const messageEl = document.getElementById('message');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnCadastrar = document.getElementById('btnCadastrar');
+    const btnGoogle = document.getElementById('btnGoogle');
 
-    async function criarDocumentoSeNaoExiste(user) {
-      const userRef = db.collection('usuarios').doc(user.uid);
-      const doc = await userRef.get();
-      if (!doc.exists) {
-        await userRef.set({
-          email: user.email,
-          pontos: 0,
-          figurinhas: []
-        });
-      }
-    }
-
-    document.getElementById('btnCadastrar').onclick = () => {
+    btnCadastrar.onclick = () => {
+      messageEl.style.color = '#333';
       messageEl.textContent = '';
       auth.createUserWithEmailAndPassword(emailEl.value, senhaEl.value)
         .then(userCredential => {
           const user = userCredential.user;
-          criarDocumentoSeNaoExiste(user);
+          return db.collection('usuarios').doc(user.uid).set({
+            email: user.email,
+            pontos: 0,
+            figurinhas: []
+          });
+        })
+        .then(() => {
           messageEl.style.color = 'green';
           messageEl.textContent = 'Usuário cadastrado! Faça login.';
         })
@@ -118,23 +203,12 @@
         });
     };
 
-    document.getElementById('btnLogin').onclick = () => {
+    btnLogin.onclick = () => {
+      messageEl.style.color = '#333';
       messageEl.textContent = '';
-
-      if (senhaEl.value === 'heitor03092014') {
-        window.location.href = 'admin.html';
-        return;
-      }
-
       auth.signInWithEmailAndPassword(emailEl.value, senhaEl.value)
-        .then(async userCredential => {
-          const user = userCredential.user;
-          await criarDocumentoSeNaoExiste(user);
-          if (emailEl.value.toLowerCase() === 'heitoradmgame@gmail.com') {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'home.html';
-          }
+        .then(userCredential => {
+          window.location.href = 'home.html';
         })
         .catch(error => {
           messageEl.style.color = 'red';
@@ -142,17 +216,24 @@
         });
     };
 
-    document.getElementById('btnGoogle').onclick = () => {
+    btnGoogle.onclick = () => {
+      messageEl.style.color = '#333';
+      messageEl.textContent = '';
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
-        .then(async result => {
+        .then(result => {
           const user = result.user;
-          await criarDocumentoSeNaoExiste(user);
-          if (user.email.toLowerCase() === 'heitoradmgame@gmail.com') {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'home.html';
-          }
+          const userRef = db.collection('usuarios').doc(user.uid);
+          userRef.get().then(doc => {
+            if (!doc.exists) {
+              userRef.set({
+                email: user.email,
+                pontos: 0,
+                figurinhas: []
+              });
+            }
+          });
+          window.location.href = 'home.html';
         })
         .catch(error => {
           messageEl.style.color = 'red';
@@ -162,11 +243,7 @@
 
     auth.onAuthStateChanged(user => {
       if (user) {
-        if (user.email.toLowerCase() === 'heitoradmgame@gmail.com') {
-          window.location.href = 'admin.html';
-        } else {
-          window.location.href = 'home.html';
-        }
+        window.location.href = 'home.html';
       }
     });
   </script>
