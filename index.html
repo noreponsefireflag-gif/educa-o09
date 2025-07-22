@@ -63,6 +63,23 @@
     #btnCadastrar:hover {
       background-color: #1a75ff;
     }
+    #btnGoogle {
+      background-color: #de5246;
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    #btnGoogle:hover {
+      background-color: #c33b30;
+    }
+    #btnGoogle img {
+      width: 20px;
+      height: 20px;
+    }
     #message {
       height: 22px;
       font-weight: 600;
@@ -78,11 +95,14 @@
     <input type="password" id="senha" placeholder="Senha" />
     <button id="btnLogin">Entrar</button>
     <button id="btnCadastrar">Cadastrar</button>
+    <button id="btnGoogle">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google logo" />
+      Entrar com Google
+    </button>
     <div id="message"></div>
   </div>
 
   <script>
-    // Config Firebase (substitua pelos seus dados reais)
     const firebaseConfig = {
       apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
       authDomain: "education-afd67.firebaseapp.com",
@@ -92,8 +112,6 @@
       appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
       measurementId: "G-7GXT149XN6"
     };
-
-    // Inicializa Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -103,6 +121,7 @@
     const senhaEl = document.getElementById('senha');
     const btnLogin = document.getElementById('btnLogin');
     const btnCadastrar = document.getElementById('btnCadastrar');
+    const btnGoogle = document.getElementById('btnGoogle');
 
     btnCadastrar.onclick = () => {
       messageEl.style.color = 'red';
@@ -146,7 +165,6 @@
 
       auth.signInWithEmailAndPassword(email, senha)
         .then(userCredential => {
-          // Redireciona para admin se for usuário admin
           if (email === 'heitoradmgame@gmail.com' && senha === 'heitor03092014') {
             window.location.href = 'admin.html';
           } else {
@@ -159,13 +177,40 @@
         });
     };
 
-    // Se o usuário já estiver logado, redireciona automaticamente
+    btnGoogle.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          // Adiciona usuário ao Firestore caso não exista
+          const user = result.user;
+          const userRef = db.collection('usuarios').doc(user.uid);
+          userRef.get().then(doc => {
+            if (!doc.exists) {
+              userRef.set({
+                email: user.email,
+                pontos: 0,
+                figurinhas: []
+              });
+            }
+          });
+          // Redireciona admin ou home
+          if (user.email === 'heitoradmgame@gmail.com') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'home.html';
+          }
+        })
+        .catch(error => {
+          messageEl.style.color = 'red';
+          messageEl.textContent = error.message;
+        });
+    };
+
+    // Se já estiver logado, redireciona automaticamente
     auth.onAuthStateChanged(user => {
       if (user) {
-        // Para garantir que senha não fica disponível, só redirecionar normal para home.
         if (user.email === 'heitoradmgame@gmail.com') {
-          // Para evitar erro se usuário atualizar página (sem senha), vai para home mesmo.
-          window.location.href = 'home.html';
+          window.location.href = 'admin.html';
         } else {
           window.location.href = 'home.html';
         }
