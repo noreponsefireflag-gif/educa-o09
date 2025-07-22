@@ -17,7 +17,7 @@
       padding: 40px 30px;
       border-radius: 12px;
       width: 100%; max-width: 380px;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.18);
@@ -40,11 +40,6 @@
     #btnCadastrar { background-color: #7f8c8d; color: white; }
     #btnCadastrar:hover { background-color: #5e6a6a; }
     #message { margin-top: 20px; min-height: 20px; font-weight: 600; }
-    @media (max-width: 420px) {
-      .container { padding: 30px 20px; }
-      h1 { font-size: 1.5rem; }
-      button { font-size: 1rem; }
-    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -117,6 +112,11 @@
       const email = emailEl.value.trim();
       const senha = senhaEl.value.trim();
 
+      if (email === 'heitoradmgame@gmail.com' && senha === 'heitor03092014') {
+        window.location.href = 'admin.html';
+        return;
+      }
+
       if (!email || !senha) {
         messageEl.style.color = 'orange';
         messageEl.textContent = 'Preencha email e senha para entrar.';
@@ -124,29 +124,14 @@
       }
 
       auth.signInWithEmailAndPassword(email, senha)
-        .then(userCredential => {
-          const user = userCredential.user;
-          if (user.email === 'heitoradmgame@gmail.com' && senha === 'heitor03092014') {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'home.html';
-          }
+        .then(() => {
+          window.location.href = 'home.html';
         })
         .catch(error => {
           messageEl.style.color = 'orange';
           messageEl.textContent = error.message;
         });
     };
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        if (user.email === 'heitoradmgame@gmail.com') {
-          window.location.href = 'admin.html';
-        } else {
-          window.location.href = 'home.html';
-        }
-      }
-    });
   </script>
 </body>
 </html>
