@@ -2,48 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quiz Educativo</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eaf6ff;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 { color: #1e88e5; }
-    #quiz-box {
-      background: #fff;
-      max-width: 500px;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-      font-size: 16px;
-      width: 90%;
-      max-width: 300px;
-      background: #2196f3;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover { background: #1976d2; }
-    #feedback { font-weight: bold; margin-top: 15px; }
-    a {
-      display: inline-block;
-      margin-top: 20px;
-      color: #1e88e5;
-      text-decoration: none;
-      font-weight: bold;
-    }
+    body { font-family: Arial; background:#eaf6ff; text-align:center; padding:20px;}
+    h1 { color: #1e88e5;}
+    #quiz-box { background:#fff; max-width:600px; margin: 20px auto; padding:20px; border-radius:10px; box-shadow:0 0 10px #aaa;}
+    button { margin:10px; padding:10px; font-size:16px;}
+    a { display:inline-block; margin-top: 20px; color:#1e88e5; text-decoration:none; font-weight:bold;}
   </style>
 </head>
 <body>
@@ -52,75 +18,50 @@
     <p id="pergunta"></p>
     <div id="respostas"></div>
     <p id="feedback"></p>
-    <button id="proxima">Próxima Pergunta</button>
+    <button onclick="novaPergunta()">Próxima Pergunta</button>
   </div>
   <a href="index.html">⬅️ Voltar</a>
 
   <script>
-    const todasPerguntas = [
+    const perguntas = [
       { pergunta: "Qual destas é um pronome pessoal?", opcoes: ["Mesa", "Ela", "Bonito"], correta: "Ela" },
       { pergunta: "Qual sinal usamos para encerrar uma frase?", opcoes: ["!", ".", ","], correta: "." },
-      { pergunta: "Qual gênero textual descreve uma receita?", opcoes: ["Notícia", "Receita", "Bilhete"], correta: "Receita" },
-      { pergunta: "Qual é um exemplo de pontuação?", opcoes: ["Carro", "Vírgula", "Correr"], correta: "Vírgula" },
-      { pergunta: "Qual destas palavras é um pronome pessoal?", opcoes: ["Nós", "Rápido", "Cachorro"], correta: "Nós" },
-      { pergunta: "Qual sinal usamos para perguntas?", opcoes: ["?", "!", "."], correta: "?" },
-      { pergunta: "Qual gênero textual narra um fato real?", opcoes: ["Poema", "Notícia", "Bilhete"], correta: "Notícia" },
-      { pergunta: "Qual é o pronome que usamos para falar de nós mesmos?", opcoes: ["Ele", "Tu", "Eu"], correta: "Eu" },
-      { pergunta: "Qual sinal expressa surpresa?", opcoes: [".", "!", ","], correta: "!" },
-      { pergunta: "Qual gênero textual é curto e direto?", opcoes: ["Bilhete", "Romance", "Artigo Científico"], correta: "Bilhete" }
+      { pergunta: "Qual é um gênero textual?", opcoes: ["Poema", "Azul", "Bonito"], correta: "Poema" },
+      { pergunta: "Qual é o plural de 'nós'?", opcoes: ["Eles", "Vocês", "Nós"], correta: "Nós" },
+      { pergunta: "O que usamos para uma pergunta?", opcoes: [".", "?", "!"], correta: "?" },
+      { pergunta: "Qual destes é uma pontuação?", opcoes: ["Mesa", ",", "Bonito"], correta: "," }
     ];
 
-    let perguntas = [];
-    let index = 0;
-    let perguntasUsadas = [];
-
-    const perguntaEl = document.getElementById('pergunta');
-    const respostasEl = document.getElementById('respostas');
-    const feedbackEl = document.getElementById('feedback');
-    const btnProxima = document.getElementById('proxima');
-
+    let perguntasFeitas = [];
     function novaPergunta() {
-      feedbackEl.textContent = '';
-      if (index >= 6) {
-        perguntaEl.textContent = "Quiz finalizado!";
-        respostasEl.innerHTML = '';
-        btnProxima.style.display = 'none';
+      if (perguntasFeitas.length >= 6) {
+        document.getElementById('pergunta').textContent = "Fim do Quiz! Você respondeu todas as perguntas.";
+        document.getElementById('respostas').innerHTML = '';
         return;
       }
+      let indice;
+      do { indice = Math.floor(Math.random() * perguntas.length); }
+      while (perguntasFeitas.includes(indice));
+      perguntasFeitas.push(indice);
 
-      // Escolhe uma pergunta aleatória que ainda não foi usada
-      let pergunta;
-      do {
-        pergunta = todasPerguntas[Math.floor(Math.random() * todasPerguntas.length)];
-      } while (perguntasUsadas.includes(pergunta));
-
-      perguntasUsadas.push(pergunta);
-      perguntaEl.textContent = pergunta.pergunta;
-      respostasEl.innerHTML = '';
-
-      pergunta.opcoes.forEach(opcao => {
+      const q = perguntas[indice];
+      document.getElementById('pergunta').textContent = q.pergunta;
+      document.getElementById('respostas').innerHTML = '';
+      document.getElementById('feedback').textContent = '';
+      q.opcoes.forEach(op => {
         const btn = document.createElement('button');
-        btn.textContent = opcao;
-        btn.onclick = () => verificarResposta(pergunta, opcao);
-        respostasEl.appendChild(btn);
+        btn.textContent = op;
+        btn.onclick = () => verificarResposta(op, q.correta);
+        document.getElementById('respostas').appendChild(btn);
       });
-      index++;
     }
 
-    function verificarResposta(pergunta, resposta) {
-      if (resposta === pergunta.correta) {
-        feedbackEl.style.color = 'green';
-        feedbackEl.textContent = "Correto!";
-      } else {
-        feedbackEl.style.color = 'red';
-        feedbackEl.textContent = `Errado! A resposta correta é: ${pergunta.correta}`;
-      }
-
-      // Desativa os botões
-      [...respostasEl.children].forEach(btn => btn.disabled = true);
+    function verificarResposta(op, correta) {
+      const feedback = document.getElementById('feedback');
+      if (op === correta) feedback.textContent = "Correto!";
+      else feedback.textContent = "Errado!";
     }
 
-    btnProxima.onclick = novaPergunta;
     novaPergunta();
   </script>
 </body>
