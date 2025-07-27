@@ -2,25 +2,49 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Quiz Educativo</title>
   <style>
-    body { font-family: Arial; background:#eaf6ff; text-align:center; padding:20px;}
-    h1 { color: #1e88e5;}
-    #quiz-box { background:#fff; max-width:600px; margin: 20px auto; padding:20px; border-radius:10px; box-shadow:0 0 10px #aaa;}
+    body {
+      font-family: Arial, sans-serif;
+      background: #eaf6ff;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #1e88e5; }
+    #quiz-box {
+      background: #fff;
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
     button {
-      margin:10px; padding:10px; font-size:16px; background:#2196f3; color:white;
-      border:none; border-radius:8px; cursor:pointer;
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: 16px;
+      width: 90%;
+      max-width: 300px;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
     }
-    button:hover:not(:disabled) { background:#1976d2; }
-    button:disabled {
-      background:#999; cursor: default;
+    button:hover { background: #1976d2; }
+    #feedback { font-weight: bold; margin-top: 15px; }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #1e88e5;
+      text-decoration: none;
+      font-weight: bold;
     }
-    a { display:inline-block; margin-top: 20px; color:#1e88e5; text-decoration:none; font-weight:bold;}
-    #feedback { font-weight:bold; margin-top:15px; }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <h1>Quiz Educativo</h1>
@@ -28,116 +52,76 @@
     <p id="pergunta"></p>
     <div id="respostas"></div>
     <p id="feedback"></p>
-    <button id="btnProxima" onclick="novaPergunta()" disabled>Próxima Pergunta</button>
+    <button id="proxima">Próxima Pergunta</button>
   </div>
-  <a href="home.html">⬅️ Voltar</a>
+  <a href="index.html">⬅️ Voltar</a>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDgCFPPfKyJJPMTlfFHAOhh24EtekxRnLw",
-      authDomain: "education-afd67.firebaseapp.com",
-      projectId: "education-afd67",
-      storageBucket: "education-afd67.appspot.com",
-      messagingSenderId: "985208233773",
-      appId: "1:985208233773:web:9ae5c9ffad39a276ca7da4",
-      measurementId: "G-7GXT149XN6"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; });
-
-    // Base de perguntas maior para pegar 6 diferentes
-    const perguntasOriginais = [
+    const todasPerguntas = [
       { pergunta: "Qual destas é um pronome pessoal?", opcoes: ["Mesa", "Ela", "Bonito"], correta: "Ela" },
-      { pergunta: "Qual sinal usamos para encerrar uma frase?", opcoes: ["Ponto final", "Vírgula", "Dois pontos"], correta: "Ponto final" },
-      { pergunta: "Qual é o gênero textual de uma receita?", opcoes: ["Notícia", "Carta", "Receita"], correta: "Receita" },
-      { pergunta: "Qual é o plural de 'pessoa'?", opcoes: ["Pessoas", "Pessoais", "Pessosas"], correta: "Pessoas" },
-      { pergunta: "Qual pronome substitui 'João'?", opcoes: ["Ele", "Nós", "Ela"], correta: "Ele" },
-      { pergunta: "Qual sinal indica uma pergunta?", opcoes: ["!", "?", "."], correta: "?" },
-      { pergunta: "Qual é o gênero textual de uma carta?", opcoes: ["Bilhete", "Carta", "Poema"], correta: "Carta" },
-      { pergunta: "Qual pronome usamos para falar de nós mesmos?", opcoes: ["Eu", "Você", "Nós"], correta: "Nós" }
+      { pergunta: "Qual sinal usamos para encerrar uma frase?", opcoes: ["!", ".", ","], correta: "." },
+      { pergunta: "Qual gênero textual descreve uma receita?", opcoes: ["Notícia", "Receita", "Bilhete"], correta: "Receita" },
+      { pergunta: "Qual é um exemplo de pontuação?", opcoes: ["Carro", "Vírgula", "Correr"], correta: "Vírgula" },
+      { pergunta: "Qual destas palavras é um pronome pessoal?", opcoes: ["Nós", "Rápido", "Cachorro"], correta: "Nós" },
+      { pergunta: "Qual sinal usamos para perguntas?", opcoes: ["?", "!", "."], correta: "?" },
+      { pergunta: "Qual gênero textual narra um fato real?", opcoes: ["Poema", "Notícia", "Bilhete"], correta: "Notícia" },
+      { pergunta: "Qual é o pronome que usamos para falar de nós mesmos?", opcoes: ["Ele", "Tu", "Eu"], correta: "Eu" },
+      { pergunta: "Qual sinal expressa surpresa?", opcoes: [".", "!", ","], correta: "!" },
+      { pergunta: "Qual gênero textual é curto e direto?", opcoes: ["Bilhete", "Romance", "Artigo Científico"], correta: "Bilhete" }
     ];
 
     let perguntas = [];
-    let perguntaAtual = 0;
-    let pontuacao = 0;
-    let respondeu = false;
+    let index = 0;
+    let perguntasUsadas = [];
 
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
+    const perguntaEl = document.getElementById('pergunta');
+    const respostasEl = document.getElementById('respostas');
+    const feedbackEl = document.getElementById('feedback');
+    const btnProxima = document.getElementById('proxima');
 
     function novaPergunta() {
-      respondeu = false;
-      document.getElementById('feedback').textContent = '';
-      const btnProxima = document.getElementById('btnProxima');
-      btnProxima.disabled = true;
-
-      if (perguntaAtual === 0) {
-        pontuacao = 0;
-        perguntas = shuffle([...perguntasOriginais]).slice(0, 6);
-      }
-
-      if (perguntaAtual >= perguntas.length) {
-        document.getElementById('pergunta').textContent = `Quiz finalizado! Sua pontuação: ${pontuacao} / ${perguntas.length}`;
-        document.getElementById('respostas').innerHTML = '';
-        btnProxima.disabled = true;
-        salvarPontos(pontuacao);
+      feedbackEl.textContent = '';
+      if (index >= 6) {
+        perguntaEl.textContent = "Quiz finalizado!";
+        respostasEl.innerHTML = '';
+        btnProxima.style.display = 'none';
         return;
       }
 
-      const p = perguntas[perguntaAtual];
-      document.getElementById('pergunta').textContent = p.pergunta;
+      // Escolhe uma pergunta aleatória que ainda não foi usada
+      let pergunta;
+      do {
+        pergunta = todasPerguntas[Math.floor(Math.random() * todasPerguntas.length)];
+      } while (perguntasUsadas.includes(pergunta));
 
-      const respostasDiv = document.getElementById('respostas');
-      respostasDiv.innerHTML = '';
-      p.opcoes.forEach(op => {
+      perguntasUsadas.push(pergunta);
+      perguntaEl.textContent = pergunta.pergunta;
+      respostasEl.innerHTML = '';
+
+      pergunta.opcoes.forEach(opcao => {
         const btn = document.createElement('button');
-        btn.textContent = op;
-        btn.onclick = () => verificarResposta(btn, op, p.correta);
-        btn.disabled = false;
-        respostasDiv.appendChild(btn);
+        btn.textContent = opcao;
+        btn.onclick = () => verificarResposta(pergunta, opcao);
+        respostasEl.appendChild(btn);
       });
-
-      perguntaAtual++;
+      index++;
     }
 
-    function verificarResposta(botao, escolhida, correta) {
-      if (respondeu) return;
-      respondeu = true;
-
-      const botoes = document.getElementById('respostas').querySelectorAll('button');
-      botoes.forEach(b => b.disabled = true);
-
-      const feedback = document.getElementById('feedback');
-      if (escolhida === correta) {
-        feedback.style.color = 'green';
-        feedback.textContent = 'Correto! +1 ponto';
-        pontuacao++;
+    function verificarResposta(pergunta, resposta) {
+      if (resposta === pergunta.correta) {
+        feedbackEl.style.color = 'green';
+        feedbackEl.textContent = "Correto!";
       } else {
-        feedback.style.color = 'red';
-        feedback.textContent = `Incorreto! Resposta correta: "${correta}"`;
+        feedbackEl.style.color = 'red';
+        feedbackEl.textContent = `Errado! A resposta correta é: ${pergunta.correta}`;
       }
-      document.getElementById('btnProxima').disabled = false;
+
+      // Desativa os botões
+      [...respostasEl.children].forEach(btn => btn.disabled = true);
     }
 
-    function salvarPontos(pontos) {
-      const user = auth.currentUser;
-      if (user) {
-        const ref = db.collection('usuarios').doc(user.uid);
-        ref.get().then(doc => {
-          if (doc.exists) {
-            const totalAtual = doc.data().pontos || 0;
-            ref.update({ pontos: totalAtual + pontos });
-          }
-        });
-      }
-    }
-
-    // Inicia o quiz na carga da página
-    window.onload = novaPergunta;
+    btnProxima.onclick = novaPergunta;
+    novaPergunta();
   </script>
 </body>
 </html>
